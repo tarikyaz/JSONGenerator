@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateTotalContentChars();
 
                 // Hide the open JSON button after file is opened
-                document.getElementById('fileInput').style.display = 'none';
+                fileInput.style.display = 'none';
                 fileSizeElem.textContent = file.size;
             } catch (error) {
                 displayWarning('Error reading JSON file.');
