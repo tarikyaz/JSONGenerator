@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Get all the DOM elements
     const titleInput = document.getElementById('titleInput');
     const contentInput = document.getElementById('contentInput');
     const titleCharCount = document.getElementById('titleCharCount');
@@ -100,7 +101,16 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 jsonData = JSON.parse(e.target.result);
                 jsonTable.innerHTML = ''; // Clear the table
+
+                if (!Array.isArray(jsonData)) {
+                    throw new Error('Invalid JSON format. Expected an array.');
+                }
+
                 jsonData.forEach(data => {
+                    if (typeof data.Title !== 'string' || typeof data.Content !== 'string') {
+                        throw new Error('Invalid data format. Each entry must have a Title and Content as strings.');
+                    }
+                    
                     const row = jsonTable.insertRow();
                     row.insertCell(0).textContent = data.Title;
                     row.insertCell(1).textContent = data.Content;
@@ -123,16 +133,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileInput.style.display = 'none';
                 fileSizeElem.textContent = file.size;
             } catch (error) {
-                displayWarning('Error reading JSON file.');
+                displayWarning('Error reading or parsing JSON file.');
+                console.error(error);
             }
         };
         reader.readAsText(file);
     }
 
-    addEntryButton.addEventListener('click', addEntry);
-    downloadButton.addEventListener('click', downloadJSON);
-    fileInput.addEventListener('change', handleFileSelect);
+    // Ensure all elements exist before adding event listeners
+    if (titleInput && contentInput && titleCharCount && contentCharCount && totalContentChars && fileSizeElem && warningElem && downloadButton && addEntryButton && jsonTable && fileInput) {
+        addEntryButton.addEventListener('click', addEntry);
+        downloadButton.addEventListener('click', downloadJSON);
+        fileInput.addEventListener('change', handleFileSelect);
 
-    titleInput.addEventListener('input', updateCharCounts);
-    contentInput.addEventListener('input', updateCharCounts);
+        titleInput.addEventListener('input', updateCharCounts);
+        contentInput.addEventListener('input', updateCharCounts);
+    } else {
+        console.error('One or more elements are missing. Check the HTML for correct IDs.');
+    }
 });
