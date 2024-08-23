@@ -4,39 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSON Editor</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <h1>JSON Editor</h1>
+        <input type="file" id="fileInput" class="file-label" />
+        <button id="downloadButton">Download JSON File</button>
+        <div id="warning"></div>
 
-        <!-- JSON Upload and File Selection -->
-        <input type="file" id="fileInput" accept=".json">
-        
-        <!-- JSON Data Table -->
+        <h2>Add Entry</h2>
+        <label for="titleInput">Title (max 25 characters):</label>
+        <input type="text" id="titleInput" maxlength="25" />
+        <label for="contentInput">Content (max 150 characters):</label>
+        <textarea id="contentInput" maxlength="150"></textarea>
+        <div class="character-counts">
+            <span id="titleCharCount" class="character-count">Title: 0/25</span>
+            <span id="contentCharCount" class="character-count">Content: 0/150</span>
+        </div>
+        <button id="addEntryButton">Add Entry</button>
+
+        <h2>JSON Data</h2>
         <table id="jsonTable">
             <thead>
                 <tr>
                     <th>Title</th>
                     <th>Content</th>
-                    <th>Actions</th> <!-- New column for actions -->
+                    <th>Title Count</th>
+                    <th>Content Count</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-            </tbody>
+            <tbody></tbody>
         </table>
 
-        <!-- Add New Entry -->
-        <div class="editor">
-            <input type="text" id="titleInput" placeholder="Title">
-            <textarea id="contentInput" placeholder="Content"></textarea>
-            <button id="addEntryButton">Add Entry</button>
+        <div>
+            <span>Total Content Characters: <span id="totalContentChars">0</span></span><br>
+            <span>File Size: <span id="fileSize">0</span> bytes</span>
         </div>
-
-        <!-- Save JSON -->
-        <button id="saveButton">Save JSON</button>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
