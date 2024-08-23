@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Editor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>JSON Editor</h1>
+
+        <!-- JSON Upload and File Selection -->
+        <input type="file" id="fileInput" accept=".json">
+        
+        <!-- JSON Data Table -->
+        <table id="jsonTable">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Content</th>
+                    <th>Actions</th> <!-- New column for actions -->
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <!-- Add New Entry -->
+        <div class="editor">
+            <input type="text" id="titleInput" placeholder="Title">
+            <textarea id="contentInput" placeholder="Content"></textarea>
+            <button id="addEntryButton">Add Entry</button>
+        </div>
+
+        <!-- Save JSON -->
+        <button id="saveButton">Save JSON</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
