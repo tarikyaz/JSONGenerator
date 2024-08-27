@@ -9,20 +9,16 @@
 <body>
     <div class="container">
         <h1>Loading Texts Editor</h1>
-
-        <!-- Metrics at the top -->
-        <div id="fixedMetrics">
-            <div id="fileSize">File Size: 0 bytes</div>
-            <div id="totalContentChars">Total Content Characters: 0</div>
-        </div>
-
-        <!-- Warning message -->
-        <div id="warning"></div>
-
-        <!-- File input and download button -->
         <input type="file" id="fileInput" />
         <button id="downloadButton">Download JSON File</button>
-
+    
+        <div id="warning"></div>
+    
+        <div>
+            <span>Total Content Characters: <span id="totalContentChars">0</span></span><br>
+            <span>File Size: <span id="fileSize">0</span> KB</span>
+        </div>
+        
         <!-- Add Entry section -->
         <h2>Add Entry</h2>
         <label for="titleInput">Title (max 25 characters):</label>

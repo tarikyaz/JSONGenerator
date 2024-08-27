@@ -13,43 +13,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('fileInput');
     let jsonData = [];
 
-    const MAX_FILE_SIZE = 5120; // 5 KB in bytes
-
     function updateCharCounts() {
         const titleLength = titleInput.value.length;
         const contentLength = contentInput.value.length;
         titleCharCount.textContent = `Title: ${titleLength}/25`;
         contentCharCount.textContent = `Content: ${contentLength}/150`;
-        updateTotalContentChars();
+        updateTotalContentCharsAndSize();
     }
 
-    function updateTotalContentChars() {
-        const totalChars = Array.from(jsonTable.rows).reduce((total, row) => {
-            const content = row.cells[1].textContent;
-            return total + content.length;
-        }, 0);
-        totalContentChars.textContent = `Total Content Characters: ${totalChars}`;
-        checkFileSize();
+    function updateTotalContentCharsAndSize() {
+        const totalChars = jsonData.reduce((total, entry) => {
+            return total + entry.Title.length + entry.Content.length;
+        }, 0) + titleInput.value.length + contentInput.value.length; // Include current input lengths
+
+        const jsonSize = new Blob([JSON.stringify(jsonData)]).size;
+        const currentJsonSize = new Blob([JSON.stringify([...jsonData, { Title: titleInput.value, Content: contentInput.value }])]).size;
+
+        totalContentChars.textContent = totalChars;
+        fileSizeElem.textContent = `${(currentJsonSize / 1024).toFixed(2)} KB`;
+
+        if (currentJsonSize > 5120) { // 5 KB limit
+            displayWarning(`Warning: Total JSON size exceeds 5 KB (${(currentJsonSize / 1024).toFixed(2)} KB).`);
+            downloadButton.disabled = true;
+            addEntryButton.disabled = true;
+        } else {
+            warningElem.style.display = 'none';
+            downloadButton.disabled = false;
+            addEntryButton.disabled = false;
+        }
     }
 
     function displayWarning(message) {
-        warningElem.textContent = message;
+        warningElem.innerText = message;
         warningElem.classList.add('show');
-        setTimeout(() => {
-            warningElem.classList.remove('show');
-        }, 5000); // Display each warning for 5 seconds
-    }
-
-    function checkFileSize() {
-        const jsonString = JSON.stringify(jsonData, null, 0);
-        const fileSize = new Blob([jsonString]).size;
-        fileSizeElem.textContent = `Total Size: ${(fileSize / 1024).toFixed(2)} KB`;
-        if (fileSize > MAX_FILE_SIZE) {
-            displayWarning(`JSON size exceeds the 5 KB limit. Current size: ${(fileSize / 1024).toFixed(2)} KB.`);
-            downloadButton.disabled = true; // Disable download button
-        } else {
-            downloadButton.disabled = false; // Enable download button
-        }
     }
 
     function addEntry() {
@@ -61,15 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const titleLength = title.length;
-        const contentLength = content.length;
-
-        if (titleLength > 25) {
+        if (title.length > 25) {
             displayWarning('Title exceeds the maximum length of 25 characters.');
             return;
         }
 
-        if (contentLength > 150) {
+        if (content.length > 150) {
             displayWarning('Content exceeds the maximum length of 150 characters.');
             return;
         }
@@ -79,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const row = jsonTable.insertRow();
         row.insertCell(0).textContent = title;
         row.insertCell(1).textContent = content;
-        row.insertCell(2).textContent = titleLength;
-        row.insertCell(3).textContent = contentLength;
+        row.insertCell(2).textContent = title.length;
+        row.insertCell(3).textContent = content.length;
         const actionCell = row.insertCell(4);
         const removeButton = document.createElement('button');
         removeButton.textContent = 'Remove';
@@ -88,23 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
         removeButton.onclick = () => {
             jsonTable.deleteRow(row.rowIndex - 1);
             jsonData = jsonData.filter(data => data.Title !== title || data.Content !== content);
-            updateTotalContentChars();
+            updateTotalContentCharsAndSize();
         };
         actionCell.appendChild(removeButton);
 
+        titleInput.value = '';
+        contentInput.value = '';
         updateCharCounts();
     }
 
     function downloadJSON() {
-        const jsonString = JSON.stringify(jsonData, null, 0);
-        const fileSize = new Blob([jsonString]).size;
-
-        if (fileSize > MAX_FILE_SIZE) {
-            displayWarning(`Cannot download: JSON size exceeds the 5 KB limit. Current size: ${(fileSize / 1024).toFixed(2)} KB.`);
-            return;
-        }
-
-        const blob = new Blob([jsonString], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(jsonData, null, 0)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -117,10 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleFileSelect(event) {
         const file = event.target.files[0];
-        if (!file) {
-            displayWarning('No file selected.');
-            return;
-        }
+        if (!file) return;
 
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -149,22 +133,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     removeButton.onclick = () => {
                         jsonTable.deleteRow(row.rowIndex - 1);
                         jsonData = jsonData.filter(item => item.Title !== data.Title || item.Content !== data.Content);
-                        updateTotalContentChars();
+                        updateTotalContentCharsAndSize();
                     };
                     actionCell.appendChild(removeButton);
                 });
-                updateTotalContentChars();
+
+                updateTotalContentCharsAndSize();
 
                 // Hide the open JSON button after file is opened
                 fileInput.style.display = 'none';
-                fileSizeElem.textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
             } catch (error) {
                 displayWarning('Error reading or parsing JSON file.');
                 console.error(error);
             }
-        };
-        reader.onerror = function() {
-            displayWarning('Error reading file.');
         };
         reader.readAsText(file);
     }
