@@ -9,10 +9,21 @@
 <body>
     <div class="container">
         <h1>Loading Texts Editor</h1>
-        <input type="file" id="fileInput" />
-        <button id="downloadButton">Download JSON File</button>
+
+        <!-- Metrics at the top -->
+        <div id="fixedMetrics">
+            <div id="fileSize">File Size: 0 bytes</div>
+            <div id="totalContentChars">Total Content Characters: 0</div>
+        </div>
+
+        <!-- Warning message -->
         <div id="warning"></div>
 
+        <!-- File input and download button -->
+        <input type="file" id="fileInput" />
+        <button id="downloadButton">Download JSON File</button>
+
+        <!-- Add Entry section -->
         <h2>Add Entry</h2>
         <label for="titleInput">Title (max 25 characters):</label>
         <input type="text" id="titleInput" maxlength="25" />
@@ -24,6 +35,7 @@
         </div>
         <button id="addEntryButton">Add Entry</button>
 
+        <!-- JSON Data Table -->
         <h2>JSON Data</h2>
         <table id="jsonTable">
             <thead>
@@ -37,11 +49,6 @@
             </thead>
             <tbody></tbody>
         </table>
-
-        <div>
-            <span>Total Content Characters: <span id="totalContentChars">0</span></span><br>
-            <span>File Size: <span id="fileSize">0</span> bytes</span>
-        </div>
     </div>
     <script src="script.js"></script>
 </body>

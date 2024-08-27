@@ -125,7 +125,7 @@ table tr:nth-child(even) {
 }
 
 /* Warning message */
-#warningContainer {
+#warning {
     position: fixed;
     top: 0;
     left: 0;
@@ -133,27 +133,19 @@ table tr:nth-child(even) {
     background-color: #f8d7da;
     color: #721c24;
     padding: 10px;
+    text-align: center;
     border: 1px solid #f5c6cb;
     border-radius: 5px;
+    display: none; /* Hidden by default */
     z-index: 1000; /* Ensure it's on top of other elements */
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
 }
 
-#warningContainer li {
-    margin: 0;
-    padding: 0;
-    border-bottom: 1px solid #f5c6cb;
-}
-
-#warningContainer li:last-child {
-    border-bottom: none;
-}
-
-
-/* Miscellaneous */
-#fileInput {
+#warning.show {
     display: block;
-    margin-bottom: 20px;
 }
+
+#warning p {
+    margin: 0;
+    padding: 0;
+}
+

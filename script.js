@@ -28,22 +28,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const content = row.cells[1].textContent;
             return total + content.length;
         }, 0);
-        totalContentChars.textContent = totalChars;
+        totalContentChars.textContent = `Total Content Characters: ${totalChars}`;
         checkFileSize();
     }
 
     function displayWarning(message) {
-        warningElem.innerText = message;
+        warningElem.textContent = message;
         warningElem.classList.add('show');
         setTimeout(() => {
             warningElem.classList.remove('show');
-        }, 5000); // Display warning for 5 seconds
+        }, 5000); // Display each warning for 5 seconds
     }
 
     function checkFileSize() {
         const jsonString = JSON.stringify(jsonData, null, 0);
         const fileSize = new Blob([jsonString]).size;
-        fileSizeElem.textContent = `${(fileSize / 1024).toFixed(2)} KB`;
+        fileSizeElem.textContent = `Total Size: ${(fileSize / 1024).toFixed(2)} KB`;
         if (fileSize > MAX_FILE_SIZE) {
             displayWarning(`JSON size exceeds the 5 KB limit. Current size: ${(fileSize / 1024).toFixed(2)} KB.`);
             downloadButton.disabled = true; // Disable download button
@@ -117,7 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleFileSelect(event) {
         const file = event.target.files[0];
-        if (!file) return;
+        if (!file) {
+            displayWarning('No file selected.');
+            return;
+        }
 
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -154,11 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Hide the open JSON button after file is opened
                 fileInput.style.display = 'none';
-                fileSizeElem.textContent = file.size;
+                fileSizeElem.textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
             } catch (error) {
                 displayWarning('Error reading or parsing JSON file.');
                 console.error(error);
             }
+        };
+        reader.onerror = function() {
+            displayWarning('Error reading file.');
         };
         reader.readAsText(file);
     }
