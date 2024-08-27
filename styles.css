@@ -1,94 +1,139 @@
-/* General Styles */
+/* General styling */
 body {
+    background-color: #1e1e1e;
+    color: #f0f0f0;
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
-    background-color: #f5f5f5;
+    padding: 20px;
+    line-height: 1.6;
 }
 
 .container {
     max-width: 800px;
-    margin: 20px auto;
+    margin: auto;
     padding: 20px;
-    background: white;
+    background-color: #2c2c2c;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
+/* Headings */
 h1, h2 {
-    color: #333;
-    margin-bottom: 15px;
+    color: #ffa726;
+    border-bottom: 1px solid #ffa726;
+    padding-bottom: 10px;
 }
 
-label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-/* Input Fields */
+/* Inputs and textarea */
 input[type="text"], textarea {
-    width: calc(100% - 22px);
+    width: 100%;
     padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
+    margin: 10px 0 20px;
+    border: 1px solid #555;
     border-radius: 4px;
+    background-color: #333;
+    color: #f0f0f0;
+    font-size: 1em;
     box-sizing: border-box;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 input[type="text"]:focus, textarea:focus {
-    border-color: #007BFF;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+    outline: none;
+    border-color: #ffa726;
 }
 
-/* Character Count Container */
-.character-counts {
-    display: flex;
-    justify-content: space-between;
+/* File Input */
+input[type="file"] {
+    display: block;
     margin-bottom: 20px;
-}
-
-.character-count {
-    font-size: 0.9em;
-    color: #666;
-}
-
-/* Button Styles */
-button {
-    padding: 10px 20px;
+    padding: 10px 15px;
+    background-color: #ffa726;
+    color: #1e1e1e;
     border: none;
     border-radius: 4px;
-    color: white;
-    background-color: #007BFF;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    transition: background-color 0.3s ease;
+}
+
+input[type="file"]::file-selector-button {
+    background-color: #ffa726;
+    color: #1e1e1e;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background-color: #ff9800;
+}
+
+/* Buttons */
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #ffa726;
+    color: #1e1e1e;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #0056b3;
-    transform: scale(1.05);
+    background-color: #ff9800;
 }
 
-button:active {
-    transform: scale(1);
+button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
 }
 
-/* Warning Message */
-#warning {
-    color: red;
-    display: none;
-    position: fixed;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #fff;
-    border: 1px solid red;
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+table th, table td {
+    border: 1px solid #555;
     padding: 10px;
+    text-align: left;
+}
+
+table th {
+    background-color: #444;
+}
+
+table tr:nth-child(even) {
+    background-color: #333;
+}
+
+/* Character counts and file info */
+.character-counts {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    color: #ffa726;
+}
+
+#totalContentChars, #fileSize {
+    color: #ffa726;
+    font-weight: bold;
+}
+
+/* Warning message */
+#warning {
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #d32f2f;
+    color: #f0f0f0;
     border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    display: none;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.5s ease;
 }
 
 #warning.show {
@@ -96,76 +141,8 @@ button:active {
     opacity: 1;
 }
 
-/* Table Styles */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
-
-table, th, td {
-    border: 1px solid #ddd;
-}
-
-th, td {
-    padding: 10px;
-    text-align: left;
-    transition: background-color 0.3s ease;
-}
-
-th {
-    background-color: #f4f4f4;
-}
-
-td:hover {
-    background-color: #f9f9f9;
-}
-
-/* Remove Button */
-.remove-btn {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.remove-btn:hover {
-    background-color: #c82333;
-    transform: scale(1.05);
-}
-
-.remove-btn:active {
-    transform: scale(1);
-}
-
-/* Download Button */
-#downloadButton {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
+/* Miscellaneous */
+#fileInput {
     display: block;
-    margin-top: 20px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-#downloadButton:hover {
-    background-color: #218838;
-    transform: scale(1.05);
-}
-
-#downloadButton:active {
-    transform: scale(1);
-}
-
-/* Character Count in Table */
-.character-count-col {
-    text-align: center;
-    color: #555;
-    font-size: 0.9em;
+    margin-bottom: 20px;
 }
