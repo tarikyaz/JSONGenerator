@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('fileInput');
     let jsonData = [];
 
+    const MAX_FILE_SIZE = 5120; // 5 KB in bytes
+
     function updateCharCounts() {
         const titleLength = titleInput.value.length;
         const contentLength = contentInput.value.length;
@@ -27,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return total + content.length;
         }, 0);
         totalContentChars.textContent = totalChars;
+        checkFileSize();
     }
 
     function displayWarning(message) {
@@ -34,7 +37,19 @@ document.addEventListener('DOMContentLoaded', () => {
         warningElem.classList.add('show');
         setTimeout(() => {
             warningElem.classList.remove('show');
-        }, 3000);
+        }, 5000); // Display warning for 5 seconds
+    }
+
+    function checkFileSize() {
+        const jsonString = JSON.stringify(jsonData, null, 0);
+        const fileSize = new Blob([jsonString]).size;
+        fileSizeElem.textContent = `${(fileSize / 1024).toFixed(2)} KB`;
+        if (fileSize > MAX_FILE_SIZE) {
+            displayWarning(`JSON size exceeds the 5 KB limit. Current size: ${(fileSize / 1024).toFixed(2)} KB.`);
+            downloadButton.disabled = true; // Disable download button
+        } else {
+            downloadButton.disabled = false; // Enable download button
+        }
     }
 
     function addEntry() {
@@ -81,7 +96,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function downloadJSON() {
-        const blob = new Blob([JSON.stringify(jsonData, null, 0)], { type: 'application/json' });
+        const jsonString = JSON.stringify(jsonData, null, 0);
+        const fileSize = new Blob([jsonString]).size;
+
+        if (fileSize > MAX_FILE_SIZE) {
+            displayWarning(`Cannot download: JSON size exceeds the 5 KB limit. Current size: ${(fileSize / 1024).toFixed(2)} KB.`);
+            return;
+        }
+
+        const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
