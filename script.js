@@ -1,12 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Get all the DOM elements
     const titleInput = document.getElementById('titleInput');
     const contentInput = document.getElementById('contentInput');
     const titleCharCount = document.getElementById('titleCharCount');
     const contentCharCount = document.getElementById('contentCharCount');
     const totalContentChars = document.getElementById('totalContentChars');
     const fileSizeElem = document.getElementById('fileSize');
-    const warningElem = document.getElementById('warning');
+    const warningsElem = document.getElementById('warnings');
     const downloadButton = document.getElementById('downloadButton');
     const addEntryButton = document.getElementById('addEntryButton');
     const jsonTable = document.getElementById('jsonTable').getElementsByTagName('tbody')[0];
@@ -18,147 +17,164 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentLength = contentInput.value.length;
         titleCharCount.textContent = `Title: ${titleLength}/25`;
         contentCharCount.textContent = `Content: ${contentLength}/150`;
-        updateTotalContentCharsAndSize();
+        updateTotalContentChars();
+        updateFileSize();
     }
 
-    function updateTotalContentCharsAndSize() {
-        const totalChars = jsonData.reduce((total, entry) => {
-            return total + entry.Title.length + entry.Content.length;
-        }, 0) + titleInput.value.length + contentInput.value.length; // Include current input lengths
-
-        const jsonSize = new Blob([JSON.stringify(jsonData)]).size;
-        const currentJsonSize = new Blob([JSON.stringify([...jsonData, { Title: titleInput.value, Content: contentInput.value }])]).size;
-
+    function updateTotalContentChars() {
+        const totalChars = jsonData.reduce((total, entry) => total + entry.Title.length + entry.Content.length, 0);
         totalContentChars.textContent = totalChars;
-        fileSizeElem.textContent = `${(currentJsonSize / 1024).toFixed(2)} KB`;
+    }
 
-        if (currentJsonSize > 5120) { // 5 KB limit
-            displayWarning(`Warning: Total JSON size exceeds 5 KB (${(currentJsonSize / 1024).toFixed(2)} KB).`);
+    function updateFileSize() {
+        const jsonString = JSON.stringify(jsonData,0,0);
+        const fileSize = new Blob([jsonString]).size;
+        fileSizeElem.textContent = fileSize;
+        return fileSize;
+    }
+
+    function checkFileSize() {
+        const fileSize = updateFileSize();
+        const fileSizeLimit = 5000;
+
+        if (fileSize > fileSizeLimit) {
             downloadButton.disabled = true;
             addEntryButton.disabled = true;
+            displayWarning(`File size exceeds 5 KB (${fileSize} bytes)`);
         } else {
-            warningElem.style.display = 'none';
             downloadButton.disabled = false;
             addEntryButton.disabled = false;
         }
     }
 
     function displayWarning(message) {
-        warningElem.innerText = message;
-        warningElem.classList.add('show');
+        const warningMessage = document.createElement("div");
+        warningMessage.className = "warning-message";
+        warningMessage.textContent = message;
+        warningsElem.appendChild(warningMessage);
+
+        setTimeout(() => {
+            warningMessage.style.opacity = 0;
+            setTimeout(() => {
+                warningsElem.removeChild(warningMessage);
+            }, 500); // Wait for fade-out animation to complete before removal
+        }, 3000); // Warning stays visible for 3 seconds
     }
 
     function addEntry() {
         const title = titleInput.value.trim();
         const content = contentInput.value.trim();
 
-        if (title === '' || content === '') {
-            displayWarning('Please fill in both Title and Content.');
+        if (content === "") {
+            displayWarning("Content cannot be empty.");
             return;
         }
 
-        if (title.length > 25) {
-            displayWarning('Title exceeds the maximum length of 25 characters.');
-            return;
-        }
-
-        if (content.length > 150) {
-            displayWarning('Content exceeds the maximum length of 150 characters.');
-            return;
-        }
-
-        jsonData.push({ Title: title, Content: content });
-
-        const row = jsonTable.insertRow();
-        row.insertCell(0).textContent = title;
-        row.insertCell(1).textContent = content;
-        row.insertCell(2).textContent = title.length;
-        row.insertCell(3).textContent = content.length;
-        const actionCell = row.insertCell(4);
-        const removeButton = document.createElement('button');
-        removeButton.textContent = 'Remove';
-        removeButton.className = 'remove-btn';
-        removeButton.onclick = () => {
-            jsonTable.deleteRow(row.rowIndex - 1);
-            jsonData = jsonData.filter(data => data.Title !== title || data.Content !== content);
-            updateTotalContentCharsAndSize();
-        };
-        actionCell.appendChild(removeButton);
-
-        titleInput.value = '';
-        contentInput.value = '';
+        const entry = { Title: title, Content: content };
+        jsonData.push(entry);
+        updateTable();
+        clearInputs();
         updateCharCounts();
+        checkFileSize();
     }
 
-    function downloadJSON() {
-        const blob = new Blob([JSON.stringify(jsonData, null, 0)], { type: 'application/json' });
+    function clearInputs() {
+        titleInput.value = "";
+        contentInput.value = "";
+        titleCharCount.textContent = "Title: 0/25";
+        contentCharCount.textContent = "Content: 0/150";
+    }
+
+    function updateTable() {
+        jsonTable.innerHTML = "";
+        jsonData.forEach((entry, index) => {
+            const row = jsonTable.insertRow();
+            const titleCell = row.insertCell(0);
+            const contentCell = row.insertCell(1);
+            const titleCountCell = row.insertCell(2);
+            const contentCountCell = row.insertCell(3);
+            const actionsCell = row.insertCell(4);
+
+            titleCell.textContent = entry.Title;
+            contentCell.textContent = entry.Content;
+            titleCountCell.textContent = entry.Title.length;
+            contentCountCell.textContent = entry.Content.length;
+
+            const editButton = document.createElement("button");
+            editButton.textContent = "Edit";
+            editButton.onclick = () => editEntry(index);
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.onclick = () => deleteEntry(index);
+
+            actionsCell.appendChild(editButton);
+            actionsCell.appendChild(deleteButton);
+        });
+    }
+
+    function editEntry(index) {
+        const entry = jsonData[index];
+        titleInput.value = entry.Title;
+        contentInput.value = entry.Content;
+
+        addEntryButton.textContent = "Save Changes";
+        addEntryButton.onclick = () => saveEntry(index);
+    }
+
+    function saveEntry(index) {
+        const updatedTitle = titleInput.value.trim();
+        const updatedContent = contentInput.value.trim();
+
+        if (updatedContent === "") {
+            displayWarning("Content cannot be empty.");
+            return;
+        }
+
+        jsonData[index].Title = updatedTitle;
+        jsonData[index].Content = updatedContent;
+
+        addEntryButton.textContent = "Add Entry";
+        addEntryButton.onclick = addEntry;
+
+        clearInputs();
+        updateTable();
+        updateCharCounts();
+        checkFileSize();
+    }
+
+    function deleteEntry(index) {
+        jsonData.splice(index, 1);
+        updateTable();
+        updateCharCounts();
+        checkFileSize();
+    }
+
+    function downloadJsonFile() {
+        const jsonString = JSON.stringify(jsonData, 0, 0);
+        const blob = new Blob([jsonString], { type: "application/json" });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = 'data.json';
-        document.body.appendChild(a);
+        a.download = "data.json";
         a.click();
-        document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
 
-    function handleFileSelect(event) {
+    titleInput.addEventListener("input", updateCharCounts);
+    contentInput.addEventListener("input", updateCharCounts);
+    addEntryButton.addEventListener("click", addEntry);
+    downloadButton.addEventListener("click", downloadJsonFile);
+
+    fileInput.addEventListener("change", (event) => {
         const file = event.target.files[0];
-        if (!file) return;
-
         const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                jsonData = JSON.parse(e.target.result);
-                jsonTable.innerHTML = ''; // Clear the table
-
-                if (!Array.isArray(jsonData)) {
-                    throw new Error('Invalid JSON format. Expected an array.');
-                }
-
-                jsonData.forEach(data => {
-                    if (typeof data.Title !== 'string' || typeof data.Content !== 'string') {
-                        throw new Error('Invalid data format. Each entry must have a Title and Content as strings.');
-                    }
-                    
-                    const row = jsonTable.insertRow();
-                    row.insertCell(0).textContent = data.Title;
-                    row.insertCell(1).textContent = data.Content;
-                    row.insertCell(2).textContent = data.Title.length;
-                    row.insertCell(3).textContent = data.Content.length;
-                    const actionCell = row.insertCell(4);
-                    const removeButton = document.createElement('button');
-                    removeButton.textContent = 'Remove';
-                    removeButton.className = 'remove-btn';
-                    removeButton.onclick = () => {
-                        jsonTable.deleteRow(row.rowIndex - 1);
-                        jsonData = jsonData.filter(item => item.Title !== data.Title || item.Content !== data.Content);
-                        updateTotalContentCharsAndSize();
-                    };
-                    actionCell.appendChild(removeButton);
-                });
-
-                updateTotalContentCharsAndSize();
-
-                // Hide the open JSON button after file is opened
-                fileInput.style.display = 'none';
-            } catch (error) {
-                displayWarning('Error reading or parsing JSON file.');
-                console.error(error);
-            }
+        reader.onload = (e) => {
+            jsonData = JSON.parse(e.target.result);
+            updateTable();
+            updateCharCounts();
+            checkFileSize();
         };
         reader.readAsText(file);
-    }
-
-    // Ensure all elements exist before adding event listeners
-    if (titleInput && contentInput && titleCharCount && contentCharCount && totalContentChars && fileSizeElem && warningElem && downloadButton && addEntryButton && jsonTable && fileInput) {
-        addEntryButton.addEventListener('click', addEntry);
-        downloadButton.addEventListener('click', downloadJSON);
-        fileInput.addEventListener('change', handleFileSelect);
-
-        titleInput.addEventListener('input', updateCharCounts);
-        contentInput.addEventListener('input', updateCharCounts);
-    } else {
-        console.error('One or more elements are missing. Check the HTML for correct IDs.');
-    }
+    });
 });
